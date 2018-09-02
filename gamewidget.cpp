@@ -2,11 +2,14 @@
 #include <QPushButton>
 #include <QHeaderView>
 #include <QtWidgets>
+#include <utility>
+
 
 #include "gameWidget.h"
 
 
 GameTable::GameTable(QWidget* parent)
+    : QTableWidget(parent)
 {
     setRowCount(3);
     setColumnCount(3);
@@ -16,7 +19,6 @@ GameTable::GameTable(QWidget* parent)
     verticalHeader()->setSectionResizeMode( QHeaderView::Stretch );
     setEditTriggers(QAbstractItemView::NoEditTriggers);
     setSelectionMode(QAbstractItemView::SingleSelection);
-    setDragEnabled(true);
     setAcceptDrops(true);
 }
 
@@ -43,7 +45,6 @@ void GameTable::dragMoveEvent(QDragMoveEvent *event)
     QModelIndex index = indexAt(event->pos());
     if (event->mimeData()->hasFormat(InventarItem::inventarMimeType())) {
         event->setDropAction(Qt::CopyAction);
-
         event->accept();
     } else {
         event->ignore();
@@ -56,7 +57,6 @@ void GameTable::dropEvent(QDropEvent *event)
     if (event->mimeData()->hasFormat(InventarItem::inventarMimeType())) {
         QByteArray itemData = event->mimeData()->data(InventarItem::inventarMimeType());
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
-
         QPixmap pixmap;
         dataStream >> pixmap;
 
@@ -67,6 +67,12 @@ void GameTable::dropEvent(QDropEvent *event)
 
         QModelIndex index = indexAt(event->pos());
         setCellWidget(index.row(), index.column(), newIcon);
+        auto mapIter = m_indexToImage.find(index);
+        if (mapIter != m_indexToImage.end()) {
+            m_indexToImage.insert(std::make_pair<QModelIndex, unsigned>(std::move(index), std::move(++mapIter->second)));
+        } else {
+            m_indexToImage.insert(std::make_pair<QModelIndex, unsigned>(std::move(index), 1));
+        }
 
         if (event->source() == this) {
             event->setDropAction(Qt::CopyAction);
@@ -79,7 +85,44 @@ void GameTable::dropEvent(QDropEvent *event)
     }
 }
 
-GameWidget::GameWidget(QWidget* parent /*= 0*/)
+void GameTable::mousePressEvent(QMouseEvent *event)
+{
+    QLabel *child = dynamic_cast<QLabel*>(childAt(event->pos()));
+    if (!child) {
+        QTableWidget::mousePressEvent(event);
+        return;
+    }
+    QPixmap pixmap = *child->pixmap();
+    QByteArray itemData;
+    QDataStream dataStream(&itemData, QIODevice::WriteOnly);
+    dataStream << pixmap;
+
+    QMimeData *mimeData = new QMimeData;
+    mimeData->setData("application/x-dnditemdata", itemData);
+
+    QDrag *drag = new QDrag(this);
+    drag->setMimeData(mimeData);
+    drag->setPixmap(pixmap);
+    drag->setHotSpot(event->pos() - child->pos());
+
+    QPixmap tempPixmap = pixmap;
+    QPainter painter;
+    painter.begin(&tempPixmap);
+    painter.fillRect(pixmap.rect(), QColor(127, 127, 127, 127));
+    painter.end();
+
+    child->setPixmap(tempPixmap);
+
+    if (drag->exec(Qt::MoveAction) == Qt::MoveAction) {
+        child->setPixmap(pixmap);
+    } else {
+        child->show();
+        child->setPixmap(pixmap);
+    }
+}
+
+GameWidget::GameWidget(QWidget* parent)
+    : QWidget(parent)
 {
     m_pTable = new GameTable(this);
 
@@ -102,9 +145,6 @@ void GameWidget::startGame()
 
 void GameWidget::mousePressEvent(QMouseEvent *event)
 {
-    if (event->button() == Qt::RightButton) {
-
-    }
 }
 
 GameWidget::~GameWidget()

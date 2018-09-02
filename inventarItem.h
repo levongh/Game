@@ -26,6 +26,4 @@ protected:
     void dropEvent(QDropEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
 
-private:
-    uint32_t m_count;
 };
