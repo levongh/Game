@@ -1,9 +1,10 @@
-#include "mainMenu.h"
+#include "mainmenu.h"
 
 #include <QPushButton>
 #include <QHBoxLayout>
 
-MainMenu::MainMenu(QWidget* parent /*= 0*/)
+MainMenu::MainMenu(QWidget* parent)
+    : QWidget(parent)
 {
     QPushButton* pStartGameBtn = new QPushButton("Start", this);
     connect(pStartGameBtn, SIGNAL(clicked(bool)), this, SIGNAL(startGame()));

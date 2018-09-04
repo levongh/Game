@@ -1,8 +1,8 @@
 #pragma once
 
 #include <QMainWindow>
-#include "mainMenu.h"
-#include "gameWidget.h"
+#include "mainmenu.h"
+#include "gamewidget.h"
 
 class MainWindow : public QMainWindow
 {

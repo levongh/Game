@@ -24,18 +24,20 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 
 SOURCES += \
-        mainMenu.cpp \
-        gameWidget.cpp \
+        mainmenu.cpp \
+        gametable.cpp \
+        gamewidget.cpp \
         main.cpp \
         mainwindow.cpp \
-        inventarItem.cpp
+        inventarItem.cpp \
 
 
 HEADERS += \
-        mainMenu.h \
-        gameWidget.h \
         mainwindow.h \
-        inventarItem.h
+        mainmenu.h \
+        inventarItem.h \
+    gametable.h \
+    gamewidget.h \
 
 RESOURCES += \
     fruit.qrc
