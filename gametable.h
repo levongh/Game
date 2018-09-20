@@ -12,14 +12,12 @@ QT_END_NAMESPACE
 
 class GameTable : public QTableWidget
 {
-    //Q_OBJECT
-
 public:
     GameTable(QWidget* parent = 0);
     virtual ~GameTable();
 
 public:
-    void mousePressEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent* event) override;
 
 protected:
     void dragEnterEvent(QDragEnterEvent *event) override;

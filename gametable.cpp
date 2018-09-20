@@ -25,6 +25,7 @@ GameTable::~GameTable()
 
 void GameTable::dragEnterEvent(QDragEnterEvent *event)
 {
+    qDebug() << __FUNCTION__;
     if (event->mimeData()->hasFormat("application/x-dnditemdata"))
         event->accept();
     else
@@ -33,11 +34,13 @@ void GameTable::dragEnterEvent(QDragEnterEvent *event)
 
 void GameTable::dragLeaveEvent(QDragLeaveEvent *event)
 {
+    qDebug() << __FUNCTION__;
     QTableWidget::dragLeaveEvent(event);
 }
 
 void GameTable::dragMoveEvent(QDragMoveEvent *event)
 {
+    qDebug() << __FUNCTION__;
     QModelIndex index = indexAt(event->pos());
     if (event->mimeData()->hasFormat(InventarItem::inventarMimeType())) {
         event->setDropAction(Qt::CopyAction);
@@ -50,6 +53,7 @@ void GameTable::dragMoveEvent(QDragMoveEvent *event)
 
 void GameTable::dropEvent(QDropEvent *event)
 {
+    qDebug() << __FUNCTION__;
     if (event->mimeData()->hasFormat(InventarItem::inventarMimeType())) {
         QByteArray itemData = event->mimeData()->data(InventarItem::inventarMimeType());
         QDataStream dataStream(&itemData, QIODevice::ReadOnly);
@@ -63,18 +67,14 @@ void GameTable::dropEvent(QDropEvent *event)
 
         QModelIndex index = indexAt(event->pos());
         setCellWidget(index.row(), index.column(), newIcon);
-        auto mapIter = m_indexToImage.find(index);
-        if (mapIter != m_indexToImage.end()) {
-            m_indexToImage.insert(std::make_pair<QModelIndex, unsigned>(std::move(index), std::move(++mapIter->second)));
-        } else {
-            m_indexToImage.insert(std::make_pair<QModelIndex, unsigned>(std::move(index), 1));
-        }
+        ++m_indexToImage[index];
+        qDebug() << m_indexToImage[index];
 
         if (event->source() == this) {
-            event->setDropAction(Qt::CopyAction);
-            event->accept();
+            //event->setDropAction(Qt::CopyAction);
+            //event->accept();
         } else {
-            event->acceptProposedAction();
+            //event->acceptProposedAction();
         }
     } else {
         event->ignore();
@@ -83,6 +83,7 @@ void GameTable::dropEvent(QDropEvent *event)
 
 void GameTable::mousePressEvent(QMouseEvent *event)
 {
+    qDebug() << __FUNCTION__;
     QLabel *child = dynamic_cast<QLabel*>(childAt(event->pos()));
     if (!child) {
         QTableWidget::mousePressEvent(event);
